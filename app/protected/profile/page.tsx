@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import UploadPicture from "@/components/ui/uploadPicture";
-import AudioDescriptionRecorder from "@/components/ui/audioDescriptionRecorder";
+import AudioDescriptionRecorder from "@/components/audioDescriptionRecorder";
 import { useProfile } from "@/contexts/ProfileContexts";
 import Image from "next/image";
 
