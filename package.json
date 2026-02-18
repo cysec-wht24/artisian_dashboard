@@ -41,5 +41,24 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "^5"
   },
-  "browserslist": "> 1%"
+  "browserslist": "> 1%",
+  "name": "artisian_dashboard",
+  "version": "1.0.0",
+  "description": "<a href=\"https://demo-nextjs-with-supabase.vercel.app/\">\r   <img alt=\"Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase\" src=\"https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png\">\r   <h1 align=\"center\">Next.js and Supabase Starter Kit</h1>\r </a>",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/divyanshu3234/artisian_dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/divyanshu3234/artisian_dashboard/issues"
+  },
+  "homepage": "https://github.com/divyanshu3234/artisian_dashboard#readme"
 }
