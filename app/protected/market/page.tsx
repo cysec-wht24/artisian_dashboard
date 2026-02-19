@@ -1,73 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { CartProvider, useCart, CartItem } from "./cartStore";
+import { useRouter } from "next/navigation";
+import { useCart, CartItem } from "./cartStore";
 import { products, categories, Product } from "./products";
 
-// ─── Cart Drawer ─────────────────────────────────────────────────────────────
+// ─── Cart Drawer ──────────────────────────────────────────────────────────────
 
 function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const router = useRouter();
   const { items, remove, setQty, total, clear } = useCart();
+
+  const handleCheckout = () => {
+    onClose();
+    router.push("/protected/market/cart");
+  };
 
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={onClose}
+        />
       )}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-neutral-900 border-l border-white/10 z-50 flex flex-col transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-80 z-50 flex flex-col shadow-2xl transition-transform duration-300
+          bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-700
+          ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h2 className="font-bold text-white">Cart ({items.length})</h2>
-          <button onClick={onClose} className="text-neutral-400 hover:text-white">✕</button>
+        <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
+          <h2 className="font-bold text-neutral-900 dark:text-white">
+            Cart ({items.length})
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white text-lg"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {items.length === 0 && (
-            <p className="text-center text-neutral-500 mt-16">Your cart is empty</p>
+            <p className="text-center text-neutral-400 mt-20 text-sm">
+              Your cart is empty
+            </p>
           )}
           {items.map((item: CartItem) => (
-            <div key={item.id} className="flex gap-3 bg-neutral-800 rounded-xl p-3">
-              <Image
+            <div
+              key={item.id}
+              className="flex gap-3 rounded-xl p-3 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+            >
+              <img
                 src={item.image}
                 alt={item.name}
-                width={56}
-                height={56}
-                className="rounded-lg object-cover"
+                className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{item.name}</p>
-                <p className="text-xs text-neutral-400">{item.artisan}</p>
+                <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+                  {item.name}
+                </p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  {item.artisan}
+                </p>
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-2 bg-neutral-700 rounded-lg px-2 py-1 text-sm">
+                  <div className="flex items-center gap-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg px-2 py-1 text-sm">
                     <button
                       onClick={() => setQty(item.id, item.qty - 1)}
-                      className="text-white w-4 text-center"
+                      className="text-neutral-700 dark:text-white w-4 text-center"
                     >
                       −
                     </button>
-                    <span className="text-white w-4 text-center">{item.qty}</span>
+                    <span className="text-neutral-900 dark:text-white w-4 text-center">
+                      {item.qty}
+                    </span>
                     <button
                       onClick={() => setQty(item.id, item.qty + 1)}
-                      className="text-white w-4 text-center"
+                      className="text-neutral-700 dark:text-white w-4 text-center"
                     >
                       +
                     </button>
                   </div>
-                  <span className="text-amber-400 font-semibold text-sm">
+                  <span className="text-amber-600 font-semibold text-sm">
                     ₹{(item.price * item.qty).toLocaleString()}
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => remove(item.id)}
-                className="text-neutral-600 hover:text-red-400 text-sm self-start"
+                className="text-neutral-300 hover:text-red-400 text-sm self-start pt-1"
               >
                 ✕
               </button>
@@ -77,21 +101,20 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="p-4 border-t border-white/10 space-y-3">
-            <div className="flex justify-between font-bold text-white">
-              <span>Total</span>
-              <span className="text-amber-400">₹{total.toLocaleString()}</span>
+          <div className="p-4 border-t border-neutral-200 dark:border-neutral-700 space-y-3">
+            <div className="flex justify-between font-bold">
+              <span className="text-neutral-900 dark:text-white">Total</span>
+              <span className="text-amber-600">₹{total.toLocaleString()}</span>
             </div>
-            <Link
-              href="/protected/market/cart"
-              onClick={onClose}
+            <button
+              onClick={handleCheckout}
               className="block w-full text-center bg-amber-500 hover:bg-amber-400 text-black font-bold py-2.5 rounded-xl transition-colors"
             >
               Checkout
-            </Link>
+            </button>
             <button
               onClick={clear}
-              className="block w-full text-center text-sm text-neutral-500 hover:text-red-400 transition-colors"
+              className="block w-full text-center text-sm text-neutral-400 hover:text-red-400 transition-colors"
             >
               Clear cart
             </button>
@@ -105,11 +128,26 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
 // ─── Product Card ─────────────────────────────────────────────────────────────
 
 function ProductCard({ product }: { product: Product }) {
+  const router = useRouter();
   const { add, items } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const inCart = items.some((i: CartItem) => i.id === product.id);
 
-  const handleAdd = () => {
+  const discount = product.oldPrice
+    ? Math.round(
+        ((product.oldPrice - product.price) / product.oldPrice) * 100
+      )
+    : null;
+
+  // Navigate to description page
+  const goToProduct = () => {
+    router.push(`/protected/market/description/${product.id}`);
+  };
+
+  // Add to cart without navigating
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!product.inStock) return;
     add({
       id: product.id,
       name: product.name,
@@ -121,19 +159,35 @@ function ProductCard({ product }: { product: Product }) {
     setTimeout(() => setJustAdded(false), 1500);
   };
 
-  const discount = product.oldPrice
-    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-    : null;
+  // Buy now without navigating to image
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!product.inStock) return;
+    add({
+      id: product.id,
+      name: product.name,
+      artisan: product.artisan,
+      price: product.price,
+      image: product.image,
+    });
+    router.push("/protected/market/cart");
+  };
 
   return (
-    <div className="bg-neutral-900 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-all group">
+    <div
+      onClick={goToProduct}
+      className="cursor-pointer group rounded-2xl overflow-hidden border transition-all duration-300
+        bg-white dark:bg-neutral-900
+        border-neutral-200 dark:border-neutral-700
+        hover:border-amber-400 dark:hover:border-amber-500
+        hover:shadow-lg"
+    >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-neutral-800">
-        <Image
+      <div className="relative aspect-square overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+        <img
           src={product.image}
           alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {product.badge && (
           <span className="absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-full bg-amber-500 text-black">
@@ -146,8 +200,8 @@ function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         {!product.inStock && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <span className="text-white text-sm font-semibold bg-neutral-800 px-3 py-1 rounded-full">
+          <div className="absolute inset-0 bg-white/70 dark:bg-black/60 flex items-center justify-center">
+            <span className="text-sm font-semibold px-3 py-1 rounded-full bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
               Out of Stock
             </span>
           </div>
@@ -159,46 +213,46 @@ function ProductCard({ product }: { product: Product }) {
         <p className="text-xs text-neutral-400 mb-1">
           {product.country} · {product.artisan}
         </p>
-        <h3 className="font-semibold text-white text-sm mb-2 line-clamp-1">
+        <h3 className="font-semibold text-sm mb-2 line-clamp-1 text-neutral-900 dark:text-white">
           {product.name}
         </h3>
 
         {/* Stars */}
-        <div className="flex items-center gap-1 mb-3">
+        <div className="flex items-center gap-0.5 mb-3">
           {Array.from({ length: 5 }).map((_: unknown, i: number) => (
             <span
               key={i}
-              className={`text-xs ${i < product.rating ? "text-amber-400" : "text-neutral-600"}`}
+              className={`text-xs ${i < product.rating ? "text-amber-400" : "text-neutral-300 dark:text-neutral-600"}`}
             >
               ★
             </span>
           ))}
-          <span className="text-xs text-neutral-500 ml-1">({product.reviews})</span>
+          <span className="text-xs text-neutral-400 ml-1">({product.reviews})</span>
         </div>
 
         {/* Price */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="font-bold text-white text-lg">
+          <span className="font-bold text-lg text-neutral-900 dark:text-white">
             ₹{product.price.toLocaleString()}
           </span>
           {product.oldPrice && (
-            <span className="text-sm text-neutral-500 line-through">
+            <span className="text-sm text-neutral-400 line-through">
               ₹{product.oldPrice.toLocaleString()}
             </span>
           )}
         </div>
 
-        {/* Buttons */}
+        {/* Buttons — stopPropagation so card click doesn't fire */}
         <div className="flex gap-2">
           <button
-            onClick={handleAdd}
+            onClick={handleAddToCart}
             disabled={!product.inStock}
             className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${
               !product.inStock
-                ? "bg-neutral-800 text-neutral-600 cursor-not-allowed"
+                ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed"
                 : justAdded || inCart
-                ? "bg-green-600 text-white"
-                : "bg-neutral-800 hover:bg-neutral-700 text-white border border-white/10"
+                ? "bg-green-500 text-white"
+                : "bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-white border border-neutral-200 dark:border-neutral-600"
             }`}
           >
             {!product.inStock
@@ -209,21 +263,26 @@ function ProductCard({ product }: { product: Product }) {
               ? "In Cart"
               : "Add to Cart"}
           </button>
-          <Link
-            href={`/protected/market/description/${product.id}`}
-            className="flex-1 text-xs font-bold py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-center transition-colors"
+          <button
+            onClick={handleBuyNow}
+            disabled={!product.inStock}
+            className={`flex-1 text-xs font-bold py-2 rounded-lg transition-colors ${
+              product.inStock
+                ? "bg-amber-500 hover:bg-amber-400 text-black"
+                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed"
+            }`}
           >
             Buy Now
-          </Link>
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Main Market Page ─────────────────────────────────────────────────────────
 
-function MarketPage() {
+function MarketContent() {
   const [cartOpen, setCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const { count } = useCart();
@@ -234,9 +293,11 @@ function MarketPage() {
       : products.filter((p: Product) => p.category === activeCategory);
 
   return (
-    <div className="w-full min-h-screen bg-neutral-950 text-white">
+    <div className="w-full min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-white">
+
       {/* Navbar */}
-      <div className="sticky top-0 z-30 bg-neutral-900/90 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
+      <div className="sticky top-0 z-30 backdrop-blur border-b px-6 py-4 flex items-center justify-between
+        bg-white/90 dark:bg-neutral-900/90 border-neutral-200 dark:border-neutral-700 shadow-sm">
         <div>
           <h1 className="text-xl font-bold">🎨 Artisan Market</h1>
           <p className="text-xs text-neutral-400">Handcrafted art from global artisans</p>
@@ -255,7 +316,8 @@ function MarketPage() {
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-2 px-6 py-4 overflow-x-auto border-b border-white/10">
+      <div className="flex gap-2 px-6 py-4 overflow-x-auto border-b
+        bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700">
         {categories.map((cat: string) => (
           <button
             key={cat}
@@ -263,7 +325,7 @@ function MarketPage() {
             className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeCategory === cat
                 ? "bg-amber-500 text-black"
-                : "bg-neutral-800 text-neutral-400 hover:text-white"
+                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
             }`}
           >
             {cat}
@@ -271,9 +333,9 @@ function MarketPage() {
         ))}
       </div>
 
-      {/* Product Grid */}
+      {/* Grid */}
       <div className="px-6 py-6">
-        <p className="text-neutral-500 text-sm mb-4">{filtered.length} items</p>
+        <p className="text-neutral-400 text-sm mb-4">{filtered.length} items</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((product: Product) => (
             <ProductCard key={product.id} product={product} />
@@ -288,9 +350,5 @@ function MarketPage() {
 }
 
 export default function Page() {
-  return (
-    <CartProvider>
-      <MarketPage />
-    </CartProvider>
-  );
+  return <MarketContent />;
 }
