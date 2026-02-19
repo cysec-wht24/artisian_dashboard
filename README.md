@@ -1,3 +1,12 @@
+                  Artisian AI Marketplace by Abhinav 
+<img width="1908" height="986" alt="Screenshot 2026-02-20 003914" src="https://github.com/user-attachments/assets/322695dc-967b-4b9b-b377-8e77ef67c66f" />
+
+
+
+
+
+
+
 <a href="https://demo-nextjs-with-supabase.vercel.app/">
   <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
   <h1 align="center">Next.js and Supabase Starter Kit</h1>
@@ -6,9 +15,6 @@
 <p align="center">
  The fastest way to build apps with Next.js and Supabase
 </p>
-
-
-
 
 
 <p align="center">
