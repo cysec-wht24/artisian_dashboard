@@ -19,7 +19,7 @@ import {
 } from "../../components/ui/card";
 import { useState, useEffect } from "react";
 
-import AudioRecorderButton from "../../components/ui/AudioRecorderButton";
+import AudioDescriptionRecorder from "../../components/audioDescriptionRecorder"; // ✅ CHANGED
 import UploadPicture from "../../components/ui/uploadPicture";
 import { createClient } from "../../lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -41,7 +41,6 @@ export default function ProtectedPage() {
       return;
     }
 
-    // First get the seller id for this user
     const { data: sellerData, error: sellerError } = await supabase
       .from("sellers")
       .select("id")
@@ -56,7 +55,7 @@ export default function ProtectedPage() {
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("seller_id", sellerData.id); // fetch products for this seller
+      .eq("seller_id", sellerData.id);
 
     if (error) {
       console.error("❌ Error fetching products:", error);
@@ -92,7 +91,6 @@ export default function ProtectedPage() {
 
   const handleDelete = async (productId: string) => {
     try {
-      // 1️⃣ Get the current authenticated user
       const {
         data: { user },
         error: userError,
@@ -104,7 +102,6 @@ export default function ProtectedPage() {
         return;
       }
 
-      // 2️⃣ Fetch the seller record for this user
       const { data: seller, error: sellerError } = await supabase
         .from("sellers")
         .select("id, is_seller")
@@ -122,12 +119,11 @@ export default function ProtectedPage() {
         return;
       }
 
-      // 3️⃣ Attempt to delete the product
       const { error: deleteError, count } = await supabase
         .from("products")
-        .delete({ count: "exact" }) // returns number of affected rows
+        .delete({ count: "exact" })
         .eq("id", productId)
-        .eq("seller_id", seller.id); // ✅ matches RLS condition
+        .eq("seller_id", seller.id);
 
       if (deleteError) {
         console.error("❌ Error deleting product:", deleteError);
@@ -135,7 +131,6 @@ export default function ProtectedPage() {
         return;
       }
 
-      // 4️⃣ Handle case where no rows were deleted (RLS or ownership mismatch)
       if (count === 0) {
         return;
       }
@@ -152,7 +147,6 @@ export default function ProtectedPage() {
     e.preventDefault();
 
     try {
-      // 1️⃣ Get the current authenticated user
       const {
         data: { user },
         error: userError,
@@ -164,7 +158,6 @@ export default function ProtectedPage() {
         return;
       }
 
-      // 2️⃣ Fetch the seller record for this user (must be verified)
       const { data: seller, error: sellerError } = await supabase
         .from("sellers")
         .select("id, is_seller")
@@ -182,7 +175,6 @@ export default function ProtectedPage() {
         return;
       }
 
-      // 3️⃣ Upload the product photo (if provided)
       let photoUrl: string | null = null;
       if (formData.productPhoto) {
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -201,7 +193,6 @@ export default function ProtectedPage() {
         photoUrl = publicUrlData.publicUrl;
       }
 
-      // 4️⃣ Insert product with seller_id + user_id
       const { data: inserted, error: insertError } = await supabase
         .from("products")
         .insert([
@@ -211,7 +202,7 @@ export default function ProtectedPage() {
             description: formData.description,
             image_url: photoUrl,
             user_id: user.id,
-            seller_id: seller.id, // ✅ important for RLS check
+            seller_id: seller.id,
           },
         ])
         .select()
@@ -219,7 +210,6 @@ export default function ProtectedPage() {
 
       if (insertError) throw insertError;
 
-      // 5️⃣ Optional: call your /api/protected route
       if (inserted) {
         try {
           const res = await fetch("/api/protected", {
@@ -238,7 +228,6 @@ export default function ProtectedPage() {
         }
       }
 
-      // 6️⃣ Refresh and reset form
       await fetchProducts();
       setFormData({
         productName: "",
@@ -305,22 +294,14 @@ export default function ProtectedPage() {
                 />
               </div>
 
-              {/* AI / Record Audio buttons */}
-              <div className="flex justify-center items-start w-full relative">
-                <span className="absolute left-1/2 transform -translate-x-1/2 top-10 text-neutral-500 p-3">
-                  OR
-                </span>
-                <AudioRecorderButton />
-              </div>
+              {/* ✅ REPLACED: AudioRecorderButton + separate textarea with AudioDescriptionRecorder */}
+              <AudioDescriptionRecorder
+                initialDescription={formData.description}
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
+                }
+              />
 
-              {/* Description */}
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Write description yourself"
-                className="w-full h-24 p-3 mt-5 rounded-md border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 resize-none focus:outline-none focus:ring-2 focus:ring-neutral-400"
-              ></textarea>
             </form>
           </ModalContent>
 
@@ -357,9 +338,6 @@ export default function ProtectedPage() {
             </CardContent>
 
             <CardFooter className="flex flex-col justify-between">
-              
-
-              {/* Action Buttons */}
               <div className="flex flex-row gap-2 items-end">
                 <button
                   className="px-3 py-1 text-xs bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-neutral-100 rounded transition"
@@ -384,4 +362,3 @@ export default function ProtectedPage() {
     </div>
   );
 }
-
