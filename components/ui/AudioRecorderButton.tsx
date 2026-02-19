@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 interface AudioRecorderButtonProps {
@@ -11,11 +11,13 @@ const AudioRecorderButton: React.FC<AudioRecorderButtonProps> = ({ onUploadCompl
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const onUploadCompleteRef = useRef(onUploadComplete);
+  const supabaseRef = useRef(createClient()); // ✅ Stable supabase client
 
-  // ✅ Create Supabase client inside component
-  const supabase = createClient();
+  useEffect(() => {
+    onUploadCompleteRef.current = onUploadComplete;
+  }, [onUploadComplete]);
 
-  // Start Recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -37,13 +39,9 @@ const AudioRecorderButton: React.FC<AudioRecorderButtonProps> = ({ onUploadCompl
     }
   };
 
-  // Stop Recording and Upload
   const stopRecording = async () => {
     const mediaRecorder = mediaRecorderRef.current;
     if (!mediaRecorder) return;
-
-    mediaRecorder.stop();
-    setIsRecording(false);
 
     mediaRecorder.onstop = async () => {
       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
@@ -51,8 +49,8 @@ const AudioRecorderButton: React.FC<AudioRecorderButtonProps> = ({ onUploadCompl
 
       console.log("Recording stopped. Uploading to Supabase...");
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabaseRef.current // ✅ Use ref
+        .storage
         .from("audio-records")
         .upload(fileName, audioBlob, {
           contentType: "audio/webm",
@@ -63,16 +61,18 @@ const AudioRecorderButton: React.FC<AudioRecorderButtonProps> = ({ onUploadCompl
         console.error("Upload failed:", error.message);
       } else {
         console.log("Upload successful:", data);
+        console.log("onUploadComplete prop exists?", !!onUploadCompleteRef.current);
 
-        // ✅ Notify parent component
-        if (onUploadComplete) {
-          onUploadComplete(fileName);
+        if (onUploadCompleteRef.current) {
+          onUploadCompleteRef.current(fileName);
         }
       }
     };
+
+    mediaRecorder.stop();
+    setIsRecording(false);
   };
 
-  // Toggle recording state
   const handleButtonClick = () => {
     if (isRecording) {
       stopRecording();
