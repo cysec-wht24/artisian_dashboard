@@ -1,4 +1,4 @@
-                  Artisian AI Marketplace by Abhinav 
+                  Artisian AI Marketplace
 <img width="1908" height="986" alt="Screenshot 2026-02-20 003914" src="https://github.com/user-attachments/assets/322695dc-967b-4b9b-b377-8e77ef67c66f" />
 
 
